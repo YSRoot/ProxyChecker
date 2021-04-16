@@ -11,13 +11,14 @@ class ProxyTypeCheck
 {
     public function handle(Proxy $proxy, Closure $next)
     {
-        $client = new Client(['base_uri' => 'https://google.com',]);
+        $client = new Client(['base_uri' => 'http://api.ipify.org',]);
 
         foreach (Proxy::TYPES as $type) {
             echo 'i check proxy type: ' . $type;
             try {
                 $client->get('/', [
                     'proxy' => $type . '://' . $proxy->ip . ':' . $proxy->port,
+                    'timeout' => 3.14,
                 ]);
                 $proxy->type = $type;
                 $proxy->status = Proxy::ENABLED_STATUS;

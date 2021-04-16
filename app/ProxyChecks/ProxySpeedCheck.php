@@ -20,7 +20,7 @@ class ProxySpeedCheck
             $client->request('GET', 'https://stluciadance.com/prospectus_file/sample.pdf', [
                 'sink' => $tmpfile,
             ]);
-            $diffRow[] = Carbon::now()->diffInSeconds($startTime);
+            $downloadTimeRow[] = Carbon::now()->diffInSeconds($startTime);
         }
         $size = (new File($tmpfile))->getSize() / 1024; //convert to KB
         $avgDownloadTime = array_sum($downloadTimeRow) / count($downloadTimeRow);
