@@ -12,7 +12,9 @@ class ProxyGeoCheck
     {
         if ($proxy->real_ip) {
             $client = new Client(['base_uri' => 'http://ip-api.com']);
-            $response = $client->get('json/' . $proxy->real_ip . '?lang=en');
+            $response = $client->get('json/' . $proxy->real_ip . '?lang=en', [
+                'proxy' => $proxy->type . '://' . $proxy->ip . ':' . $proxy->port,
+            ]);
             $result = json_decode($response->getBody(), true);
             if (isset($result['status']) && $result['status'] == 'success') {
                 $proxy->geo = $result['country'] . '/' . $result['city'];
