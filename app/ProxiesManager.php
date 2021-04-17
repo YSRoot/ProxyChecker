@@ -2,29 +2,27 @@
 
 namespace App;
 
-use App\Jobs\CheckProxiesJob;
+use App\Jobs\CheckProxyJob;
 use App\Models\Proxy;
 use App\Models\ProxyList;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProxiesManager
 {
     public function bulkCreate(string $proxies, ProxyList $proxyList): void
     {
-        $proxies = collect(explode(PHP_EOL, $proxies))
-            ->transform(function (string $proxy) use ($proxyList) {
-                return (new ProxyManager())->firstOrCreate($proxy, $proxyList);
+        collect(explode(PHP_EOL, $proxies))
+            ->each(function (string $proxy) use ($proxyList) {
+                $proxy = (new ProxyManager())->firstOrCreate($proxy, $proxyList);
+                dispatch(new CheckProxyJob($proxy));
             });
-
-        dispatch(new CheckProxiesJob($proxies));
     }
 
-    public function check(?Collection $proxies = null): void
+    public function check(): void
     {
-        if (!isset($proxies)) {
-            $proxies = Proxy::notChecked();
-        }
-
-        $proxies->chunk(10, fn (Proxy $proxy) => (new ProxyManager($proxy))->check());
+        Proxy::notChecked()
+            ->chunk(50, function (Collection $proxies) {
+                $proxies->each(fn (Proxy $proxy) => dispatch(new CheckProxyJob($proxy)));
+            });
     }
 }
