@@ -14,7 +14,6 @@ class ProxyTypeCheck
         $client = new Client(['base_uri' => 'http://api.ipify.org',]);
 
         foreach (Proxy::TYPES as $type) {
-            echo 'i check proxy type: ' . $type;
             try {
                 $client->get('/', [
                     'proxy' => $type . '://' . $proxy->ip . ':' . $proxy->port,
@@ -27,6 +26,6 @@ class ProxyTypeCheck
             }
         }
 
-        return $next($proxy);
+        return $proxy;
     }
 }
